@@ -1,0 +1,22 @@
+DEBUG: TIME: 2021/05/11 10:20:03 programLicense.go:105: ParseFields 200 5000
+INFO: TIME: 2021/05/11 10:20:03 |Message: accounts table not found - created
+INFO: TIME: 2021/05/11 10:20:03 |Message: Start work...
+DEBUG: TIME: 2021/05/11 10:21:22 programLicense.go:105: ParseFields 200 5000
+INFO: TIME: 2021/05/11 10:21:22 |Message: accounts table not found - created
+DEBUG: TIME: 2021/05/11 10:22:46 programLicense.go:105: ParseFields 200 5000
+INFO: TIME: 2021/05/11 10:22:46 |Message: accounts table not found - created
+DEBUG: TIME: 2021/05/11 10:23:50 programLicense.go:105: ParseFields 200 5000
+INFO: TIME: 2021/05/11 10:23:50 |Message: accounts table not found - created
+DEBUG: TIME: 2021/05/11 10:28:35 programLicense.go:105: ParseFields 200 5000
+INFO: TIME: 2021/05/11 10:28:35 |Message: accounts table not found - created
+DEBUG: TIME: 2021/05/11 10:28:48 programLicense.go:105: ParseFields 200 5000
+INFO: TIME: 2021/05/11 10:28:48 |Message: Start work...
+INFO: TIME: 2021/05/11 10:28:48 |Message: Start server without SSL
+ERROR: TIME: 2021/05/11 10:28:48 main.go:87: |Message: Error start main server  listen tcp :443: bind: permission denied
+ERROR: TIME: 2021/05/11 10:28:48 main.go:71: |Message: Error start main server  listen tcp :80: bind: permission denied
+INFO: TIME: 2021/05/11 10:29:15 |Message: Shutting down server...
+DEBUG: TIME: 2021/05/11 10:29:29 programLicense.go:105: ParseFields 200 5000
+INFO: TIME: 2021/05/11 10:29:30 |Message: Start work...
+INFO: TIME: 2021/05/11 10:29:30 |Message: Start server without SSL
+ERROR: TIME: 2021/05/11 10:29:34 main.go:71: |Message: Error start main server  http: Server closed
+INFO: TIME: 2021/05/11 10:29:34 |Message: Shutting down server...

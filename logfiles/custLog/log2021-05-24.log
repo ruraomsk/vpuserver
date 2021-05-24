@@ -1,0 +1,2 @@
+DEBUG: TIME: 2021/05/24 13:33:29 programLicense.go:105: ParseFields 200 5000
+ERROR: TIME: 2021/05/24 13:33:29 main.go:57: |Message: Error open DB sql: unknown driver "postgres" (forgotten import?)

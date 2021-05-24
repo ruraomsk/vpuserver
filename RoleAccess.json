@@ -1,0 +1,308 @@
+{
+  "roles": [
+    {
+      "name": "Admin",
+      "permissions": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+	10
+      ]
+    },
+    {
+      "name": "RegAdmin",
+      "permissions": [
+        1,
+        2,
+        3,
+        4,
+        8,
+	10
+      ]
+    },
+    {
+      "name": "User",
+      "permissions": [
+        1,
+        3,
+        4,
+	7,
+        8,
+	10
+      ]
+    },
+    {
+      "name": "Viewer",
+      "permissions": [
+        1,
+        3,
+	10
+      ]
+    }
+  ],
+  "permissions": [
+    {
+      "id": 1,
+      "visible": false,
+      "description": "Общие разрешения для всех"
+    },
+    {
+      "id": 2,
+      "visible": false,
+      "description": "Разрешения для администраторов"
+    },
+    {
+      "id": 3,
+      "visible": false,
+      "description": "Работа с перекрестком"
+    },
+    {
+      "id": 4,
+      "visible": false,
+      "description": "Работа с привязкой устройств"
+    },
+    {
+      "id": 5,
+      "visible": true,
+      "description": "Просмотр лога устройства"
+    },
+    {
+      "id": 6,
+      "visible": true,
+      "description": "Работа с лицензиями программы"
+    },
+    {
+      "id": 7,
+      "visible": true,
+      "description": "Работа с сервером связи"
+    },
+    {
+      "id": 8,
+      "visible": false,
+      "description": "Работа в режиме Зеленой Улицы"
+    },
+    {
+      "id": 9,
+      "visible": true,
+      "description": "Работа с характерными точками"
+    },
+    {
+      "id": 10,
+      "visible": true,
+      "description": "Предупреждения"
+    }
+  ],
+  "routes": [
+    {
+      "permission": 1,
+      "path": "/chatW",
+      "description": "чат на сервере (вебсокет)"
+    },
+    {
+      "permission": 3,
+      "path": "/cross",
+      "description": "информация о состоянии перекрестка"
+    },
+    {
+      "permission": 3,
+      "path": "/crossW",
+      "description": "сросс вебсокет (вебсокет)"
+    },
+    {
+      "permission": 3,
+      "path": "/multipleCross",
+      "description": "информация о состоянии перекрестка"
+    },
+    {
+      "permission": 3,
+      "path": "/multipleCrossW",
+      "description": "сросс вебсокет (вебсокет)"
+    },
+    {
+      "permission": 4,
+      "path": "/cross/control",
+      "description": "страничка работы с привязкой перекрестка"
+    },
+    {
+      "permission": 4,
+      "path": "/cross/controlW",
+      "description": "вебсокет привязкой перекрестка"
+    },
+    {
+      "permission": 4,
+      "path": "/cameras",
+      "description": "страничка работы с камерами на перекрестке"
+    },
+    {
+      "permission": 7,
+      "path": "/techArm",
+      "description": "рабочее место технолога (страничка)"
+    },
+    {
+      "permission": 7,
+      "path": "/techArmW",
+      "description": "рабочее место технолога"
+    },
+    {
+      "permission": 8,
+      "path": "/greenStreet",
+      "description": "режим Зеленой Улицы"
+    },
+    {
+      "permission": 8,
+      "path": "/greenStreetW",
+      "description": "режим Зеленой Улицы (сокет)"
+    },
+    {
+      "permission": 8,
+      "path": "/dispatchControl",
+      "description": "режим ДУ"
+    },
+    {
+      "permission": 8,
+      "path": "/dispatchControlW",
+      "description": "режим ДУ (сокет)"
+    },
+    {
+      "permission": 9,
+      "path": "/charPoints",
+      "description": "работа с характерными точками"
+    },
+    {
+      "permission": 9,
+      "path": "/charPointsW",
+      "description": "работа с характерными точками (вебсокет)"
+    },
+    {
+      "permission": 1,
+      "path": "/alarm",
+      "description": "Предупреждения"
+    },
+    {
+      "permission": 1,
+      "path": "/alarmW",
+      "description": "Предупреждения"
+    },
+    {
+      "permission": 1,
+      "path": "/techSupp",
+      "description": "страничка тех поддержки"
+    },
+    {
+      "permission": 1,
+      "path": "/techSupp/send",
+      "description": "отправка сообщения тех поддержке"
+    },
+    {
+      "permission": 1,
+      "path": "/manage/changepw",
+      "description": "обработчик для изменения пароля"
+    },
+    {
+      "permission": 2,
+      "path": "/manage",
+      "description": "обработка создание и редактирования пользователя"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/delete",
+      "description": "обработчик для удаления аккаунтов"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/add",
+      "description": "обработчик для добавления аккаунтов"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/update",
+      "description": "обработчик для редактирования данных аккаунта"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/resetpw",
+      "description": "обработчик для сброса пароля администратором"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/crossEditControl",
+      "description": "обработчик по управлению занятых перекрестков"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/crossEditControl/free",
+      "description": "обработчик по управлению освобождению перекрестка"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/stateTest",
+      "description": "обработчик проверки структуры State"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/serverLog",
+      "description": "обработчик по выгрузке лог файлов сервера"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/serverLog/info",
+      "description": "обработчик выбранного лог файла сервера"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/crossCreator",
+      "description": "обработка проверки/создания каталога карты перекрестков"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/crossCreator/checkAllCross",
+      "description": "обработка проверки наличия всех каталогов и файлов необходимых для построения перекрестков"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/crossCreator/checkSelected",
+      "description": "обработка проверки наличия выбранных каталогов и файлов необходимых для построения перекрестков"
+    },
+    {
+      "permission": 2,
+      "path": "/manage/crossCreator/makeSelected",
+      "description": "обработка создания каталога карты перекрестков"
+    },
+    {
+      "permission": 5,
+      "path": "/deviceLog",
+      "description": "обработка лога от устройства"
+    },
+    {
+      "permission": 5,
+      "path": "/deviceLog/info",
+      "description": "обработка лога устройства по выбранному интеревалу времени"
+    },
+    {
+      "permission": 5,
+      "path": "/devLogCopy",
+      "description": "обработка лога от устройства"
+    },
+    {
+      "permission": 5,
+      "path": "/devLogCopy/info",
+      "description": "обработка лога устройства по выбранному интеревалу времени"
+    },
+    {
+      "permission": 6,
+      "path": "/license",
+      "description": "обработчик сбора начальной информации о лицензии"
+    },
+    {
+      "permission": 6,
+      "path": "/license/newToken",
+      "description": "обработчик сохранения нового токена"
+    }
+  ]
+}
