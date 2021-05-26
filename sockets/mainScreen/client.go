@@ -7,6 +7,7 @@ import (
 	"github.com/ruraomsk/VPUserver/model/accToken"
 	"github.com/ruraomsk/VPUserver/model/data"
 	"github.com/ruraomsk/VPUserver/sockets"
+	"github.com/ruraomsk/device/dataBase"
 	"time"
 )
 
@@ -20,21 +21,23 @@ const (
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
 
-	crossTick           = time.Second * 5
+	phoneTick           = time.Second * 5
 	checkTokensValidity = time.Minute * 1
 )
 
 var UserLogoutGS chan string //канал для закрытия сокетов, пользователя который вышел из системы
 
-//ClientMainMap информация о подключившемся пользователе
+//ClientMS информация о подключившемся пользователе
 type ClientMS struct {
 	hub  *HubMainScreen
 	conn *websocket.Conn
 	send chan mSResponse
 
-	cInfo    *accToken.Token
-	rawToken string
-	cookie   string
+	cInfo     *accToken.Token
+	rawToken  string
+	cookie    string
+	isLogin   bool
+	listPhone map[string]dataBase.Phone
 }
 
 //readPump обработчик чтения сокета
@@ -43,8 +46,8 @@ func (c *ClientMS) readPump() {
 	_ = c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { _ = c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
-	//mainCross.GetCrossUserForMap <- true
 	for {
+
 		_, p, err := c.conn.ReadMessage()
 		if err != nil {
 			c.hub.unregister <- c
@@ -60,14 +63,9 @@ func (c *ClientMS) readPump() {
 			continue
 		}
 		switch typeSelect {
-		case typeJump: //отправка default
+		case typeRepaint: //отправка default
 			{
-				//location := &data.Locations{}
-				//_ = json.Unmarshal(p, &location)
-				//box, _ := location.MakeBoxPoint()
-				//resp := newMainMess(typeJump, nil)
-				//resp.Data["boxPoint"] = box
-				//c.send <- resp
+				c.listPhone = make(map[string]dataBase.Phone)
 			}
 		case typeLogin: //отправка default
 			{
@@ -78,7 +76,8 @@ func (c *ClientMS) readPump() {
 				)
 				_ = json.Unmarshal(p, &account)
 				resp := newMainMess(typeLogin, nil)
-				resp.Data, token, tokenStr = logIn(account.Login, account.Password, c.conn.RemoteAddr().String())
+				var status bool
+				resp.Data, token, tokenStr, status = logIn(account.Login, account.Password, c.conn.RemoteAddr().String())
 				if token != nil {
 					//делаем выход из аккаунта
 					for client := range c.hub.clients {
@@ -93,6 +92,7 @@ func (c *ClientMS) readPump() {
 					c.cookie = tokenStr
 				}
 				c.send <- resp
+				c.isLogin = status
 			}
 		case typeChangeAccount:
 			{
@@ -101,9 +101,10 @@ func (c *ClientMS) readPump() {
 					token    *accToken.Token
 					tokenStr string
 				)
+				var status bool
 				_ = json.Unmarshal(p, &account)
 				resp := newMainMess(typeLogin, nil)
-				resp.Data, token, tokenStr = logIn(account.Login, account.Password, c.conn.RemoteAddr().String())
+				resp.Data, token, tokenStr, status = logIn(account.Login, account.Password, c.conn.RemoteAddr().String())
 				if token != nil {
 					//делаем выход из аккаунта
 					respLO := newMainMess(typeLogOut, nil)
@@ -116,6 +117,7 @@ func (c *ClientMS) readPump() {
 					c.send <- respLO
 				}
 				c.send <- resp
+				c.isLogin = status
 			}
 		case typeLogOut: //отправка default
 			{
@@ -129,6 +131,7 @@ func (c *ClientMS) readPump() {
 					c.cInfo = new(accToken.Token)
 					c.cookie = ""
 					c.send <- resp
+					c.isLogin = false
 				}
 			}
 		case typeCheckConn: //отправка default

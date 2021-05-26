@@ -101,13 +101,13 @@
   "routes": [
     {
       "permission": 1,
-      "path": "/chatW",
-      "description": "чат на сервере (вебсокет)"
+      "path": "/MainPage",
+      "description": "Главная страница"
     },
     {
       "permission": 3,
-      "path": "/cross",
-      "description": "информация о состоянии перекрестка"
+      "path": "/MainPageW",
+      "description": "Главная страница вебсокет"
     },
     {
       "permission": 3,

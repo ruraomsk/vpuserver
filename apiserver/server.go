@@ -18,25 +18,7 @@ import (
 //MainServer настройка основного сервера
 func MainServer(conf *ServerConf) (srvHttp *http.Server, srvHttps *http.Server) {
 	mainScreenHub := mainScreen.NewMainScreenHub()
-	//mainCrossHub := mainCross.NewCrossHub()
-	//controlCrHub := controlCross.NewCrossHub()
-	//techArmHub := techArm.NewTechArmHub()
-	//alarmHub := alarm.NewAlarmHub()
-	//xctrlHub := xctrl.NewXctrlHub()
-	//gsHub := greenStreet.NewGSHub()
-	//dcHub := dispatchControl.NewDCHub()
-	//chatHub := chat.NewChatHub()
-	//
-	//go device.StartReadDevices()
-	//go mainMapHub.Run()
-	//go mainCrossHub.Run()
-	//go controlCrHub.Run()
-	//go techArmHub.Run()
-	//go alarmHub.Run()
-	//go xctrlHub.Run()
-	//go gsHub.Run()
-	//go chatHub.Run()
-	//go dcHub.Run()
+	go mainScreenHub.Run()
 
 	// Создаем engine для соединений
 	gin.SetMode(gin.ReleaseMode)
@@ -47,7 +29,7 @@ func MainServer(conf *ServerConf) (srvHttp *http.Server, srvHttps *http.Server) 
 	router := gin.Default()
 	router.Use(cors.Default())
 	router.Use(secureHandle())
-	router.LoadHTMLGlob(conf.StaticPath)
+	router.LoadHTMLGlob(conf.HTMLPath)
 
 	//скрипт и иконка которые должны быть доступны всем
 	router.StaticFS("/static", http.Dir(conf.StaticPath))
@@ -97,7 +79,7 @@ func MainServer(conf *ServerConf) (srvHttp *http.Server, srvHttps *http.Server) 
 	fileServer.Use(middleWare.JwtFile())
 
 	fsStatic := fileServer.Group("/static")
-	fsStatic.StaticFS("/static", http.Dir(conf.StaticPath+"/static"))
+	fsStatic.StaticFS("/static", http.Dir(conf.StaticPath))
 	//fsStatic.StaticFS("/img", http.Dir(conf.StaticPath+"/img"))
 	//fsStatic.StaticFS("/markdown", http.Dir(conf.StaticPath+"/markdown"))
 

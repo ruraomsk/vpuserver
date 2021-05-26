@@ -4,6 +4,7 @@ import (
 	"github.com/ruraomsk/VPUserver/model/accToken"
 	"github.com/ruraomsk/VPUserver/model/data"
 	"github.com/ruraomsk/VPUserver/model/license"
+	"reflect"
 	"sync"
 	"time"
 )
@@ -31,91 +32,90 @@ func (h *HubMainScreen) Run() {
 	data.AccAction = make(chan string, 50)
 	license.LogOutAllFromLicense = make(chan bool)
 	checkValidityTicker := time.NewTicker(checkTokensValidity)
-	crossReadTick := time.NewTicker(crossTick)
+	phoneReadTick := time.NewTicker(phoneTick)
 	defer func() {
-		crossReadTick.Stop()
+		phoneReadTick.Stop()
 		checkValidityTicker.Stop()
 	}()
-
 	for {
 		select {
-		case <-crossReadTick.C:
+		case <-phoneReadTick.C:
 			{
+				mutex.Lock()
 				if len(h.clients) > 0 {
-					//if len(newTFs) != len(oldTFs) {
-					//	resp := newMapMess(typeRepaint, nil)
-					//	resp.Data["tflight"] = newTFs
-					//	data.FillMapAreaZone()
-					//	data.CacheArea.Mux.Lock()
-					//	resp.Data["areaZone"] = data.CacheArea.Areas
-					//	data.CacheArea.Mux.Unlock()
-					//	for client := range h.clients {
-					//		client.send <- resp
-					//	}
-					//} else {
-					//	var (
-					//		tempTF   []data.TrafficLights
-					//		flagFill = false
-					//	)
-					//	for _, nTF := range newTFs {
-					//		var flagAdd = true
-					//		for _, oTF := range oldTFs {
-					//			if oTF.Idevice == nTF.Idevice {
-					//				flagAdd = false
-					//				if oTF.Sost.Num != nTF.Sost.Num || oTF.Description != nTF.Description || oTF.Points != nTF.Points {
-					//					flagAdd = true
-					//				}
-					//				if oTF.Subarea != nTF.Subarea {
-					//					flagAdd = true
-					//					flagFill = true
-					//				}
-					//				break
-					//			}
-					//		}
-					//		if flagAdd {
-					//			tempTF = append(tempTF, nTF)
-					//		}
-					//	}
-					//	if len(tempTF) > 0 {
-					//		resp := newMapMess(typeTFlight, nil)
-					//		if flagFill {
-					//			data.FillMapAreaZone()
-					//			data.CacheArea.Mux.Lock()
-					//			resp.Data["areaZone"] = data.CacheArea.Areas
-					//			data.CacheArea.Mux.Unlock()
-					//		}
-					//		resp.Data["tflight"] = tempTF
-					//		for client := range h.clients {
-					//			client.send <- resp
-					//		}
-					//	}
-					//}
-					//oldTFs = newTFs
+					newPhones := getAllPhones()
+					for client := range h.clients {
+						if !client.isLogin {
+							continue
+						}
+						if len(newPhones) != len(client.listPhone) {
+							resp := newMainMess(typeRepaint, nil)
+							resp.Data["phones"] = newPhones
+							client.send <- resp
+						} else {
+							found := false
+							for _, phn := range newPhones {
+								pho, is := client.listPhone[phn.Login]
+								if !is {
+									found = true
+									break
+								}
+								if !reflect.DeepEqual(&phn, &pho) {
+									found = true
+									break
+								}
+							}
+							if !found {
+								for _, pho := range client.listPhone {
+									phn, is := newPhones[pho.Login]
+									if !is {
+										found = true
+										break
+									}
+									if !reflect.DeepEqual(&phn, &pho) {
+										found = true
+										break
+									}
+								}
+							}
+							if found {
+								resp := newMainMess(typeRepaint, nil)
+								resp.Data["phones"] = newPhones
+								client.send <- resp
+							}
+
+						}
+						client.listPhone = newPhones
+					}
+
 				}
+				mutex.Unlock()
 			}
+
 		case client := <-h.register:
 			{
-				{
-					flag, tk := checkToken(client.cookie, client.cInfo.IP)
-					resp := newMainMess(typeMapInfo, nil)
-					if flag {
-						resp.Data["role"] = tk.Role
-						resp.Data["access"] = data.AccessCheck(tk.Login, 2, 5, 6, 7, 8, 9, 10)
-						resp.Data["description"] = tk.Description
-						resp.Data["authorizedFlag"] = true
-						resp.Data["region"] = tk.Region
-						client.cInfo = tk
-					}
+				flag, tk := checkToken(client.cookie, client.cInfo.IP)
+				resp := newMainMess(typeMapInfo, nil)
+				if flag {
+					resp.Data["role"] = tk.Role
+					resp.Data["access"] = data.AccessCheck(tk.Login, 2, 5, 6, 7, 8, 9, 10)
+					resp.Data["description"] = tk.Description
+					resp.Data["authorizedFlag"] = true
+					resp.Data["region"] = tk.Region
+					client.cInfo = tk
 					client.send <- resp
 				}
-
+				mutex.Lock()
 				h.clients[client] = true
+				mutex.Unlock()
 			}
 		case client := <-h.unregister:
 			{
 				if _, ok := h.clients[client]; ok {
+					mutex.Lock()
 					delete(h.clients, client)
 					close(client.send)
+					mutex.Lock()
 					_ = client.conn.Close()
 				}
 			}
@@ -125,8 +125,10 @@ func (h *HubMainScreen) Run() {
 					select {
 					case client.send <- mess:
 					default:
+						mutex.Lock()
 						delete(h.clients, client)
 						close(client.send)
+						mutex.Unlock()
 					}
 				}
 			}

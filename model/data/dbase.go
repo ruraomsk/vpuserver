@@ -1,13 +1,13 @@
 package data
 
 import (
-	_ "database/sql"
+	"database/sql"
 	"fmt"
 	"github.com/ruraomsk/VPUserver/config"
 	"sync"
 
-	_ "github.com/jackc/pgx"
-	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+
 	"github.com/ruraomsk/TLServer/logger"
 )
 
@@ -30,7 +30,7 @@ var (
 )
 
 type usedDb struct {
-	db   *sqlx.DB
+	db   *sql.DB
 	used bool
 }
 
@@ -44,7 +44,8 @@ func ConnectDB() error {
 		dbPool = make([]usedDb, 0)
 		first = false
 		for i := 0; i < config.GlobalConfig.DBConfig.SetMaxOpenConst; i++ {
-			conn, err := sqlx.Open(config.GlobalConfig.DBConfig.Type, config.GlobalConfig.DBConfig.GetDBurl())
+			//conn, err := sql.Open(config.GlobalConfig.DBConfig.Type, config.GlobalConfig.DBConfig.GetDBurl())
+			conn, err := sql.Open("postgres", config.GlobalConfig.DBConfig.GetDBurl())
 			if err != nil {
 				return err
 			}
@@ -52,11 +53,11 @@ func ConnectDB() error {
 		}
 	}
 	db, id := GetDB()
-	_, err := db.Exec(`SELECT * FROM public."accounts";`)
+	_, err := db.Exec(`SELECT * FROM accounts;`)
 	if err != nil {
 		fmt.Println("accounts table not found - created")
 		logger.Info.Println("|Message: accounts table not found - created")
-		db.MustExec(accountsTable)
+		_, _ = db.Exec(accountsTable)
 		FirstCreate = true
 	}
 
@@ -65,7 +66,7 @@ func ConnectDB() error {
 }
 
 //GetDB обращение к БД
-func GetDB() (db *sqlx.DB, id int) {
+func GetDB() (db *sql.DB, id int) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	for i, d := range dbPool {

@@ -201,7 +201,7 @@ func SuperCreate() {
 	db, id := GetDB()
 	defer FreeDB(id)
 
-	db.MustExec(`INSERT INTO  public.accounts (login, password, work_time, description) VALUES ($1, $2, $3, $4)`,
+	_, _ = db.Exec(`INSERT INTO  public.accounts (login, password, work_time, description) VALUES ($1, $2, $3, $4)`,
 		account.Login, account.Password, account.WorkTime, account.Description)
 	////Записываю координаты в базу!!!
 	_ = privilege.WriteRoleInBD(account.Login)

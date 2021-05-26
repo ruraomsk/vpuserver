@@ -66,7 +66,7 @@ func checkToken(cookie string, ip string) (flag bool, t *accToken.Token) {
 }
 
 //logIn обработчик авторизации пользователя в системе
-func logIn(login, password, ip string) (map[string]interface{}, *accToken.Token, string) {
+func logIn(login, password, ip string) (map[string]interface{}, *accToken.Token, string, bool) {
 	db, id := data.GetDB()
 	defer data.FreeDB(id)
 	resp := make(map[string]interface{})
@@ -77,12 +77,12 @@ func logIn(login, password, ip string) (map[string]interface{}, *accToken.Token,
 	if rows == nil {
 		resp["status"] = false
 		resp["message"] = fmt.Sprintf("Неверно указан логин или пароль")
-		return resp, nil, ""
+		return resp, nil, "", false
 	}
 	if err != nil {
 		resp["status"] = false
 		resp["message"] = "Потеряно соединение с сервером БД"
-		return resp, nil, ""
+		return resp, nil, "", false
 	}
 	for rows.Next() {
 		_ = rows.Scan(&account.Login, &account.Password, &account.WorkTime, &account.Description)
@@ -94,7 +94,7 @@ func logIn(login, password, ip string) (map[string]interface{}, *accToken.Token,
 	if err != nil {
 		resp["status"] = false
 		resp["message"] = fmt.Sprintf("Неверно указан логин или пароль")
-		return resp, nil, ""
+		return resp, nil, "", false
 	}
 
 	//Сравниваю хэши полученного пароля и пароля взятого из БД
@@ -102,7 +102,7 @@ func logIn(login, password, ip string) (map[string]interface{}, *accToken.Token,
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
 		resp["status"] = false
 		resp["message"] = fmt.Sprintf("Неверно указан логин или пароль")
-		return resp, nil, ""
+		return resp, nil, "", false
 	}
 	//Залогинились, создаем токен
 	account.Password = ""
@@ -129,7 +129,7 @@ func logIn(login, password, ip string) (map[string]interface{}, *accToken.Token,
 	if err != nil {
 		resp["status"] = false
 		resp["message"] = "Потеряно соединение с сервером БД"
-		return resp, nil, ""
+		return resp, nil, "", false
 	}
 
 	//Формируем ответ
@@ -145,7 +145,7 @@ func logIn(login, password, ip string) (map[string]interface{}, *accToken.Token,
 	var areaMap = make(map[string]string)
 	resp["area"] = areaMap
 
-	return resp, tk, tokenStr
+	return resp, tk, tokenStr, true
 }
 
 //logOut выход из учетной записи
