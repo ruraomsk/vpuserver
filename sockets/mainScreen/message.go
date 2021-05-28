@@ -5,6 +5,7 @@ var (
 	typeMapInfo        = "mapInfo"
 	typeTFlight        = "tflight"
 	typeRepaint        = "repaint"
+	typePhoneTable     = "phoneTable"
 	typeEditCrossUsers = "editCrossUsers"
 	typeLogin          = "login"
 	typeLogOut         = "logOut"

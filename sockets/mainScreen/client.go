@@ -38,6 +38,7 @@ type ClientMS struct {
 	cookie    string
 	isLogin   bool
 	listPhone map[string]dataBase.Phone
+	work      bool
 }
 
 //readPump обработчик чтения сокета
@@ -45,13 +46,12 @@ func (c *ClientMS) readPump() {
 	//если нужно указать лимит пакета
 	_ = c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { _ = c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
-
 	for {
-
 		_, p, err := c.conn.ReadMessage()
 		if err != nil {
 			c.hub.unregister <- c
-			break
+			c.work = false
+			return
 		}
 		//ну отправка и отправка
 		typeSelect, err := sockets.ChoseTypeMessage(p)
@@ -63,7 +63,7 @@ func (c *ClientMS) readPump() {
 			continue
 		}
 		switch typeSelect {
-		case typeRepaint: //отправка default
+		case typePhoneTable: //отправка default
 			{
 				c.listPhone = make(map[string]dataBase.Phone)
 			}
@@ -82,7 +82,7 @@ func (c *ClientMS) readPump() {
 					//делаем выход из аккаунта
 					for client := range c.hub.clients {
 						if client.cInfo.Login == account.Login {
-							logOutSockets(account.Login)
+							//logOutSockets(account.Login)
 							respLO := newMainMess(typeLogOut, nil)
 							client.send <- respLO
 							break
@@ -126,7 +126,7 @@ func (c *ClientMS) readPump() {
 					status := logOut(c.cInfo.Login)
 					if status {
 						resp.Data["authorizedFlag"] = false
-						logOutSockets(c.cInfo.Login)
+						//logOutSockets(c.cInfo.Login)
 					}
 					c.cInfo = new(accToken.Token)
 					c.cookie = ""
@@ -169,8 +169,10 @@ func (c *ClientMS) readPump() {
 //writePump обработчик записи в сокет
 func (c *ClientMS) writePump() {
 	pingTick := time.NewTicker(pingPeriod)
+	workTick := time.NewTicker(50 * time.Millisecond)
 	defer func() {
 		pingTick.Stop()
+		workTick.Stop()
 	}()
 	for {
 		select {
@@ -192,6 +194,12 @@ func (c *ClientMS) writePump() {
 			{
 				_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 				if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+					return
+				}
+			}
+		case <-workTick.C:
+			{
+				if !c.work {
 					return
 				}
 			}

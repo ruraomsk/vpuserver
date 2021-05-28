@@ -1,11 +1,10 @@
 package mainScreen
 
 import (
+	"github.com/ruraomsk/TLServer/logger"
 	"github.com/ruraomsk/VPUserver/model/accToken"
 	"github.com/ruraomsk/VPUserver/model/data"
 	"github.com/ruraomsk/VPUserver/model/license"
-	"reflect"
-	"sync"
 	"time"
 )
 
@@ -25,8 +24,6 @@ func NewMainScreenHub() *HubMainScreen {
 	}
 }
 
-var mutex sync.Mutex
-
 func (h *HubMainScreen) Run() {
 	UserLogoutGS = make(chan string, 5)
 	data.AccAction = make(chan string, 50)
@@ -41,55 +38,7 @@ func (h *HubMainScreen) Run() {
 		select {
 		case <-phoneReadTick.C:
 			{
-				mutex.Lock()
-				if len(h.clients) > 0 {
-					newPhones := getAllPhones()
-					for client := range h.clients {
-						if !client.isLogin {
-							continue
-						}
-						if len(newPhones) != len(client.listPhone) {
-							resp := newMainMess(typeRepaint, nil)
-							resp.Data["phones"] = newPhones
-							client.send <- resp
-						} else {
-							found := false
-							for _, phn := range newPhones {
-								pho, is := client.listPhone[phn.Login]
-								if !is {
-									found = true
-									break
-								}
-								if !reflect.DeepEqual(&phn, &pho) {
-									found = true
-									break
-								}
-							}
-							if !found {
-								for _, pho := range client.listPhone {
-									phn, is := newPhones[pho.Login]
-									if !is {
-										found = true
-										break
-									}
-									if !reflect.DeepEqual(&phn, &pho) {
-										found = true
-										break
-									}
-								}
-							}
-							if found {
-								resp := newMainMess(typeRepaint, nil)
-								resp.Data["phones"] = newPhones
-								client.send <- resp
-							}
-
-						}
-						client.listPhone = newPhones
-					}
-
-				}
-				mutex.Unlock()
+				h.sendFhones()
 			}
 
 		case client := <-h.register:
@@ -105,18 +54,18 @@ func (h *HubMainScreen) Run() {
 					client.cInfo = tk
 					client.send <- resp
 				}
-				mutex.Lock()
 				h.clients[client] = true
-				mutex.Unlock()
+				h.sendFhones()
 			}
 		case client := <-h.unregister:
 			{
 				if _, ok := h.clients[client]; ok {
-					mutex.Lock()
-					delete(h.clients, client)
-					close(client.send)
-					mutex.Lock()
-					_ = client.conn.Close()
+					client.isLogin = false
+					//close(client.send)
+					//_ = client.conn.Close()
+					logger.Debug.Printf("остановили клиента %s", client.cInfo.Login)
+				} else {
+					logger.Debug.Printf("нет клиента %s", client.cInfo.Login)
 				}
 			}
 		case mess := <-h.broadcast:
@@ -125,10 +74,8 @@ func (h *HubMainScreen) Run() {
 					select {
 					case client.send <- mess:
 					default:
-						mutex.Lock()
 						delete(h.clients, client)
 						close(client.send)
-						mutex.Unlock()
 					}
 				}
 			}
@@ -167,6 +114,22 @@ func (h *HubMainScreen) Run() {
 			{
 				for client := range h.clients {
 					data.AccAction <- client.cInfo.Login
+				}
+			}
+		case login := <-UserLogoutGS:
+			{
+				for client := range h.clients {
+					if client.cInfo.Login == login {
+						if _, ok := h.clients[client]; ok {
+							client.isLogin = false
+							client.work = false
+							delete(h.clients, client)
+							close(client.send)
+							_ = client.conn.Close()
+							break
+						}
+
+					}
 				}
 			}
 		}
