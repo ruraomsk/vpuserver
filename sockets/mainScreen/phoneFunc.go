@@ -39,6 +39,22 @@ func mapToArray(phones map[string]dataBase.Phone) []dataBase.Phone {
 	})
 	return res
 }
+func getAreas() map[int]string {
+	res := make(map[int]string)
+	db, id := data.GetDB()
+	defer data.FreeDB(id)
+	rows, err := db.Query("select area,namearea from area;")
+	if err != nil {
+		return res
+	}
+	var area int
+	var namearea string
+	for rows.Next() {
+		_ = rows.Scan(&area, &namearea)
+		res[area] = namearea
+	}
+	return res
+}
 func (h *HubMainScreen) sendFhones() {
 	if len(h.clients) > 0 {
 		newPhones := getAllPhones()
@@ -50,6 +66,7 @@ func (h *HubMainScreen) sendFhones() {
 			if len(newPhones) != len(client.listPhone) {
 				resp := newMainMess(typePhoneTable, nil)
 				resp.Data["phones"] = mapToArray(newPhones)
+				resp.Data["areas"] = getAreas()
 				client.send <- resp
 			} else {
 				found := false
@@ -80,6 +97,7 @@ func (h *HubMainScreen) sendFhones() {
 				if found {
 					resp := newMainMess(typePhoneTable, nil)
 					resp.Data["phones"] = mapToArray(newPhones)
+					resp.Data["areas"] = getAreas()
 					client.send <- resp
 				}
 

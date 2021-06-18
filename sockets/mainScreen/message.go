@@ -6,14 +6,27 @@ var (
 	typeTFlight        = "tflight"
 	typeRepaint        = "repaint"
 	typePhoneTable     = "phoneTable"
+	typeCreatePhone    = "createPhone"
+	typeRemovePhone    = "removePhone"
+	typeUpdatePhone    = "updatePhone"
 	typeEditCrossUsers = "editCrossUsers"
-	typeLogin          = "login"
-	typeLogOut         = "logOut"
-	typeChangeAccount  = "changeAcc"
-	typeError          = "error"
-	typeClose          = "close"
-	typeCheckConn      = "checkConn"
-	typeDButton        = "dispatch"
+
+	typeLogKeys     = "logKeys"
+	typeGetLogs     = "getLogs" // key from to
+	typeGetCrosses  = "getCrosses"
+	typeUpdateCross = "updateCross"
+
+	typeLogin         = "login"
+	typeLogOut        = "logOut"
+	typeChangeAccount = "changeAcc"
+	typeError         = "error"
+	typeClose         = "close"
+	typeCheckConn     = "checkConn"
+	typeDButton       = "dispatch"
+	typegetAccounts   = "getAccounts"   //Вернуть все accounts
+	typeremoveAccount = "removeAccount" //удалить account data login
+	typenewAccount    = "newAccount"    //добавить account data login
+	typeupdateAccount = "updateAccount" //обновить  account data login
 
 	errParseType = "Сервер не смог обработать запрос"
 )
